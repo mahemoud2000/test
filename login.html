@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحة تسجيل الدخول</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #deletedOrdersContainer {
+            margin-top: 20px;
+        }
+        .order-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .order-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        button {
+            padding: 5px 10px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>الطلبات المحذوفة</h1>
+    <div id="deletedOrdersContainer">
+        <!-- الطلبات المحذوفة ستظهر هنا -->
+    </div>
+    <div class="addUser"><a href="index.html" target="_blank">اضف مطعم</a></div>
+    <script>
+        function displayDeletedOrders() {
+            const deletedOrders = JSON.parse(localStorage.getItem('deletedOrders')) || [];
+            const deletedOrdersContainer = document.getElementById('deletedOrdersContainer');
+            deletedOrdersContainer.innerHTML = '';
+
+            deletedOrders.forEach((order, index) => {
+                const orderDiv = document.createElement('div');
+                orderDiv.className = 'order-item';
+                orderDiv.innerHTML = `
+                    <div class="order-title">طلب رقم ${order.id}</div>
+                    <div><strong>اسم الطلب:</strong> ${order.name}</div>
+                    <div><strong>رقم العميل:</strong> ${order.customerNumber}</div>
+                    <div><strong>تاريخ ووقت الإرسال:</strong> ${order.timestamp}</div>
+                    <button onclick="restoreOrder(${index})">استرجاع</button>
+                    <button onclick="permanentDelete(${index})">حذف نهائي</button>
+                `;
+                deletedOrdersContainer.appendChild(orderDiv);
+            });
+        }
+
+        function restoreOrder(index) {
+            const deletedOrders = JSON.parse(localStorage.getItem('deletedOrders')) || [];
+            const restoredOrder = deletedOrders.splice(index, 1)[0];
+            localStorage.setItem('deletedOrders', JSON.stringify(deletedOrders));
+
+            let orders = JSON.parse(localStorage.getItem('orders')) || [];
+            orders.push(restoredOrder);
+            localStorage.setItem('orders', JSON.stringify(orders));
+
+            displayDeletedOrders(); // إعادة عرض الطلبات المحذوفة بعد الاسترجاع
+        }
+
+        function permanentDelete(index) {
+            const deletedOrders = JSON.parse(localStorage.getItem('deletedOrders')) || [];
+            deletedOrders.splice(index, 1); // حذف العنصر نهائيًا
+            localStorage.setItem('deletedOrders', JSON.stringify(deletedOrders));
+
+            displayDeletedOrders(); // إعادة عرض الطلبات المحذوفة بعد الحذف النهائي
+        }
+
+        window.onload = displayDeletedOrders;
+    </script>
+</body>
+</html>

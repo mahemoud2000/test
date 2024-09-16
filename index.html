@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة طلبات</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-container {
+            margin-bottom: 20px;
+        }
+        #ordersContainer {
+            margin-top: 20px;
+        }
+        .order-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .order-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .delete-button {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <h1>إضافة طلب</h1>
+
+    <!-- نموذج لإضافة طلب -->
+    <div class="form-container">
+        <label for="orderName">اسم الطلب:</label>
+        <input type="text" id="orderName" placeholder="أدخل اسم الطلب">
+
+        <label for="orderId">رقم الطلب:</label>
+        <input type="text" id="orderId" placeholder="أدخل رقم الطلب">
+
+        <label for="customerNumber">رقم العميل:</label>
+        <input type="text" id="customerNumber" placeholder="أدخل رقم العميل">
+
+        <button onclick="addOrder()">أضف طلب</button>
+    </div>
+
+    <h2>جميع الطلبات</h2>
+    <div id="ordersContainer">
+        <!-- الطلبات ستظهر هنا -->
+    </div>
+    <div class="dellOrders" id="dellOrders">
+        <a href="login.html" target="_blank">الطلبات المحذوفه</a>
+    </div>
+    <script>
+        function addOrder() {
+            const name = document.getElementById('orderName').value;
+            const id = document.getElementById('orderId').value;
+            const customerNumber = document.getElementById('customerNumber').value;
+
+            if (name && id && customerNumber) {
+                const newOrder = {
+                    name: name,
+                    id: id,
+                    customerNumber: customerNumber,
+                    timestamp: new Date().toLocaleString()
+                };
+
+                let orders = JSON.parse(localStorage.getItem('orders')) || [];
+                orders.push(newOrder);
+                localStorage.setItem('orders', JSON.stringify(orders));
+
+                document.getElementById('orderName').value = '';
+                document.getElementById('orderId').value = '';
+                document.getElementById('customerNumber').value = '';
+
+                displayOrders();
+            } else {
+                alert('يرجى ملء جميع الحقول.');
+            }
+        }
+
+        function displayOrders() {
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const ordersContainer = document.getElementById('ordersContainer');
+            ordersContainer.innerHTML = '';
+
+            orders.forEach((order, index) => {
+                const orderDiv = document.createElement('div');
+                orderDiv.className = 'order-item';
+                orderDiv.innerHTML = `
+                    <div class="order-title">طلب رقم ${order.id}</div>
+                    <div><strong>اسم الطلب:</strong> ${order.name}</div>
+                    <div><strong>رقم العميل:</strong> ${order.customerNumber}</div>
+                    <div><strong>تاريخ ووقت الإرسال:</strong> ${order.timestamp}</div>
+                    <button class="delete-button" onclick="deleteOrder(${index})">حذف</button>
+                `;
+                ordersContainer.appendChild(orderDiv);
+            });
+        }
+
+        function deleteOrder(index) {
+            let orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const deletedOrder = orders.splice(index, 1)[0];
+            localStorage.setItem('orders', JSON.stringify(orders));
+
+            // نقل البيانات المحذوفة إلى صفحة "صفحة تسجيل الدخول"
+            let deletedOrders = JSON.parse(localStorage.getItem('deletedOrders')) || [];
+            deletedOrders.push(deletedOrder);
+            localStorage.setItem('deletedOrders', JSON.stringify(deletedOrders));
+
+            displayOrders(); // إعادة عرض الطلبات بعد الحذف
+        }
+
+        window.onload = displayOrders;
+    </script>
+</body>
+</html>
