@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عرض الطلبات</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #ordersContainer {
+            margin-top: 20px;
+        }
+        .order-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .order-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .delete-button {
+            background-color: #f44336;
+        }
+        .restore-button {
+            background-color: #2196F3;
+        }
+        .delete-final-button {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>جميع الطلبات</h1>
+    <div id="ordersContainer"></div>
+
+    <script>
+        function displayOrders() {
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const ordersContainer = document.getElementById('ordersContainer');
+            ordersContainer.innerHTML = '';
+
+            orders.forEach((order, index) => {
+                const orderDiv = document.createElement('div');
+                orderDiv.className = 'order-item';
+                orderDiv.innerHTML = `
+                    <div class="order-title">طلب رقم ${index + 1}</div>
+                    <div><strong>اسم العميل:</strong> ${order.name}</div>
+                    <div><strong>رقم العميل:</strong> ${order.id}</div>
+                    <div><strong>رقم الطلب:</strong> ${order.orderId}</div>
+                    <div><strong>تاريخ ووقت الإرسال:</strong> ${order.timestamp}</div>
+                    <button onclick="editOrder(${index})">تعديل</button>
+                    <button class="delete-button" onclick="deleteOrder(${index})">حذف</button>
+                `;
+                ordersContainer.appendChild(orderDiv);
+            });
+        }
+
+        function editOrder(index) {
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const order = orders[index];
+
+            const newName = prompt('تعديل اسم العميل:', order.name);
+            const newId = prompt('تعديل رقم العميل:', order.id);
+            const newOrderId = prompt('تعديل رقم الطلب:', order.orderId);
+
+            if (newName !== null && newId !== null && newOrderId !== null) {
+                orders[index] = {
+                    name: newName,
+                    id: newId,
+                    orderId: newOrderId,
+                    timestamp: order.timestamp
+                };
+                localStorage.setItem('orders', JSON.stringify(orders));
+                displayOrders();
+            }
+        }
+
+        function deleteOrder(index) {
+            let orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const deletedOrder = orders.splice(index, 1)[0];
+
+            // Store deleted orders in localStorage
+            let deletedOrders = JSON.parse(localStorage.getItem('deletedOrders')) || [];
+            deletedOrders.push(deletedOrder);
+            localStorage.setItem('deletedOrders', JSON.stringify(deletedOrders));
+
+            localStorage.setItem('orders', JSON.stringify(orders));
+            displayOrders();
+        }
+
+        window.onload = displayOrders;
+    </script>
+</body>
+</html>
